@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navegador Virtual</title>
+    <style>
+        #browser {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+        }
+        #urlBar {
+            width: 80%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="urlBar" placeholder="Ingrese URL">
+    <button onclick="navigate()">Ir</button>
+    <button onclick="goBack()">Atrás</button>
+    <button onclick="goForward()">Adelante</button>
+    <iframe id="browser" src="about:blank"></iframe>
+
+    <script>
+        const browser = document.getElementById('browser');
+        const urlBar = document.getElementById('urlBar');
+        let history = JSON.parse(localStorage.getItem('browserHistory')) || [];
+        let currentIndex = parseInt(localStorage.getItem('currentIndex')) || -1;
+
+        function navigate() {
+            let url = urlBar.value;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            browser.src = url;
+            history = history.slice(0, currentIndex + 1);
+            history.push(url);
+            currentIndex = history.length - 1;
+            saveState();
+        }
+
+        function goBack() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                browser.src = history[currentIndex];
+                urlBar.value = history[currentIndex];
+                saveState();
+            }
+        }
+
+        function goForward() {
+            if (currentIndex < history.length - 1) {
+                currentIndex++;
+                browser.src = history[currentIndex];
+                urlBar.value = history[currentIndex];
+                saveState();
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('browserHistory', JSON.stringify(history));
+            localStorage.setItem('currentIndex', currentIndex);
+        }
+
+        window.onload = function() {
+            if (history.length > 0) {
+                browser.src = history[currentIndex];
+                urlBar.value = history[currentIndex];
+            }
+        }
+    </script>
+</body>
+</html>
